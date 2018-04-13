@@ -64,20 +64,24 @@ const bookmark_app = (function() {
       '<option value="4">4</option>',
       '<option value="5">5</option>',
     ];
+
+    const myNewArr = [];
+
     let num = bm.rating;
     console.log(typeof num);
-    // let num = parseInt(bm.rating);
-    console.log(bm.rating);
-    myArr.forEach((str, ind) => {
-      // let foo = str.match(r);
-      // console.log(foo[0]);
+    console.log(num);
+    myArr.map((str, ind) => {
       let myInd = ind + 1;
+      console.log(myInd);
+      console.log((myInd === num));
       if (myInd === num) {
         let boo = `${str.slice(0, 17)} selected`;
         let goo = `${str.slice(17)}`;
+        myNewArr.push(boo + goo);
       }
     });
-
+    const optionsStr = myNewArr.join('');
+    console.log(optionsStr);
 
     return `
        <article data-bm-id="${bm.id}">
@@ -91,11 +95,13 @@ const bookmark_app = (function() {
         </div>
         <label for="rating-select">Rating:</label>
             <select id="rating-select" name="rating">
-                <option value="1">1</option>
-                <option value="2">2</option>
-                <option value="3">3</option>
-                <option value="4">4</option>
-                <option value="5">5</option>
+                ${optionsStr}
+            
+                <!--<option value="1">1</option>-->
+                <!--<option value="2">2</option>-->
+                <!--<option value="3">3</option>-->
+                <!--<option value="4">4</option>-->
+                <!--<option value="5">5</option>-->
             </select>
     </article>`;
   };
