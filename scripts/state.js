@@ -20,7 +20,15 @@ const state = (function() {
   const setMinRating = (newRating) => {
     console.log('setMinRating ran');
     console.log(newRating);
-    state.minRating = newRating;
+    if (newRating === 'Minimum rating') {
+      state.minRating = 1;
+    } else {
+      state.minRating = newRating;
+    }
+  };
+
+  const updateDesc = () => {
+    console.log('updateDesc ran');
   };
 
   const filterBm = () => {
@@ -33,11 +41,13 @@ const state = (function() {
     bookmarks: [],
     minRating: 1,
     serverError: null,
-    userError: null,
+    userTitleError: false,
+    userUrlError: false,
 
     addBookmark,
     findAndDelete,
     setMinRating,
+    updateDesc,
     filterBm,
   };
 }());

@@ -23,10 +23,9 @@ const bookmark_app = (function() {
           <input type="text" name="bookmark-title" class="js-bookmark-title" placeholder="Bookmark Title" required>
           <label for="bookmark-url">Site url:</label>
           <input type="text" name="bookmark-url" class="js-bookmark-url" placeholder="www.site-url.com" required>
-          <label for="bookmark-desc">Short description (max 140 characters):</label>
+          <!--<label for="bookmark-desc">Short description (max 140 characters):</label>-->
           <textarea name="bookmark-desc" class="js-bookmark-desc" cols="30" rows="5"></textarea>
           <span id="js-char-count" class="hide">140</span>
-          <!--<input type="text" name="bookmark-desc" class="js-bookmark-desc" placeholder="Bookmark description">-->
           <button type="submit">Add new</button>
           <button id='js-bttn-cancel-submit' type="button">Cancel</button>
           <label for="rating-select">Rating:</label>
@@ -43,19 +42,6 @@ const bookmark_app = (function() {
 
   const generateBookmarkElement = (bm) => {
     console.log('generateBookmarkElement ran');
-    // let itemTitle = `<span class="shopping-item shopping-item__checked">${item.name}</span>`;
-    // if (!item.checked) {
-      //itemTitle = `<!---->
-        <!--<form class="js-edit-item">-->
-          <!--<input class="shopping-item type="text" value="" />-->
-        //<!--</form>-->
-      // `;
-    // }
-    // let hideClass;
-    //
-    // if (bm.expanded) {
-    //   hideClass = 'hide';
-    // }
 
     const myArr = [
       '<option value="1">1</option>',
@@ -65,44 +51,38 @@ const bookmark_app = (function() {
       '<option value="5">5</option>',
     ];
 
-    const myNewArr = [];
-
     let num = bm.rating;
-    console.log(typeof num);
-    console.log(num);
-    myArr.map((str, ind) => {
-      let myInd = ind + 1;
-      console.log(myInd);
-      console.log((myInd === num));
-      if (myInd === num) {
-        let boo = `${str.slice(0, 17)} selected`;
-        let goo = `${str.slice(17)}`;
-        myNewArr.push(boo + goo);
-      }
-    });
-    const optionsStr = myNewArr.join('');
-    console.log(optionsStr);
+    const myNewArr = myArr
+      .map((str, ind) => {
+        let myInd = ind + 1;
+        if (myInd === num) {
+          let leftPrt = `${str.slice(0, 17)} selected`;
+          let rightPrt = `${str.slice(17)}`;
+          return leftPrt + rightPrt;
+        }
+        return str;
+      })
+      .join('');
 
     return `
-       <article data-bm-id="${bm.id}">
+       <article class="flex-item" data-bm-id="${bm.id}">
         <h3>
-            <button class='js-collapsible-button' aria-expanded="${bm.expanded}" aria-controls="">${bm.title}</button>
+            <button class='header-button js-collapsible-button' aria-expanded="${bm.expanded}" aria-controls="">${bm.title}</button>
         </h3>
         <div class="${!bm.expanded ? 'hide' : ''} js-collapsible">
-            <p>${bm.desc}</p>
+            <p class="js-edit-desc">${bm.desc}</p>
             <a href="${bm.url}" class='button-link' target="_blank">Visit Site</a>
+            <button class='js-save-button' type="button">Save</button>
             <button class='js-delete-button' type="button">Delete</button>
         </div>
-        <label for="rating-select">Rating:</label>
+        <div>
+            <label for="rating-select">Rating:</label>
             <select id="rating-select" name="rating">
-                ${optionsStr}
-            
-                <!--<option value="1">1</option>-->
-                <!--<option value="2">2</option>-->
-                <!--<option value="3">3</option>-->
-                <!--<option value="4">4</option>-->
-                <!--<option value="5">5</option>-->
+                ${myNewArr}
             </select>
+        </div>
+        
+        
     </article>`;
   };
 
@@ -112,17 +92,13 @@ const bookmark_app = (function() {
   };
 
   // Render bookmark list in the DOM
-  function render() {
+  const render = () => {
     console.log('`render` ran');
     let bmArr = state.filterBm();
-
     const bookmarksString = generateBookmarkString(bmArr);
-
     // insert that HTML into the DOM
     $('.js-bookmark-list').html(bookmarksString);
-
-  }
-
+  };
 
   const handleNewBookmarkSubmit = () => {
     console.log('handleNewBookmarkSubmit ran');
@@ -133,19 +109,6 @@ const bookmark_app = (function() {
       $('.js-header').append(formHtml);
       handleAddBookmarkSubmit();
       handleCancelBookmarkSubmit();
-      // const newItemName = $('.js-shopping-list-entry').val();
-      // $('.js-shopping-list-entry').val('');
-      // api.createItem(newItemName,
-      //   (newItem) => {
-      //     store.addItem(newItem);
-      //     render();
-      //   },
-      //   (err) => {
-      //     console.log(err);
-      //     store.setError(err);
-      //     render();
-      //   }
-      // );
     });
   };
 
@@ -157,22 +120,24 @@ const bookmark_app = (function() {
       const newUrl = $('.js-bookmark-url').val().trim();
       const newDesc = $('.js-bookmark-desc').val().trim();
       const newRating = $('#rating-select').val().trim();
-      console.log(newTitle, newUrl, newDesc, newRating);
       validation.validateTitle(newTitle);
-      api.createBookmark(newTitle, newUrl, newDesc, newRating,
-        (newBookmark) => {
-          console.log(newBookmark);
-          state.addBookmark(newBookmark);
-          $('#js-bookmark-form').toggleClass('hide');
-          $('#js-bookmark-submit-form').remove();
-          render();
-        },
-        (err) => {
-          console.log(err);
-          // store.setError(err);
-          render();
-        }
-      );
+      validation.validateUrl(newUrl);
+      if(!state.userTitleError && !state.userUrlError) {
+        api.createBookmark(newTitle, newUrl, newDesc, newRating,
+          (newBookmark) => {
+            console.log(newBookmark);
+            state.addBookmark(newBookmark);
+            $('#js-bookmark-form').toggleClass('hide');
+            $('#js-bookmark-submit-form').remove();
+            render();
+          },
+          (err) => {
+            console.log(err);
+            // state.serverError = true;
+            render();
+          }
+        );
+      }
     });
   };
 
@@ -189,8 +154,14 @@ const bookmark_app = (function() {
     console.log('handleCollapsing ran');
     $('.js-bookmark-list').on('click', '.js-collapsible-button', function(event) {
       event.stopPropagation();
-     const collapsEl = $(event.target).parent().next();
-     $(collapsEl).toggleClass('hide');
+      const target = $(event.target);
+      if (target.attr( 'aria-expanded') === 'true') {
+        $(this).attr( 'aria-expanded', 'false');
+      } else {
+        $(this).attr( 'aria-expanded', 'true');
+      }
+      const collapsEl = target.parent().next();
+      $(collapsEl).toggleClass('hide');
     })
   };
 
@@ -202,7 +173,7 @@ const bookmark_app = (function() {
   };
 
   const handleDeleteClicked = () => {
-    console.log('handleDeleteButton ran');
+    console.log('handleDeleteClicked ran');
     $('.js-bookmark-list').on('click', '.js-delete-button', event => {
       event.stopPropagation();
       console.log(event.target);
@@ -215,6 +186,30 @@ const bookmark_app = (function() {
     });
   };
 
+  // const handleEditDescMode = () => {
+  //   console.log('handleEditDescClicked ran');
+  //   $('.js-bookmark-list').on('click', '.js-edit-desc', event => {
+  //     event.stopPropagation();
+  //     console.log(event.target);
+  //     $(event.target).attr('contentEditable', true).focus();
+  //     const id = getIdFromElement(event.target);
+  //     console.log(id);
+  //   });
+  // };
+  //
+  // const handleEditDescUpdate = () => {
+  //   console.log('handleEditDescUpdate ran');
+  //   $('.js-bookmark-list').on('click', '.js-save-button', event => {
+  //     event.stopPropagation();
+  //     console.log(event.target);
+  //     console.log(event.currentTarget);
+  //     console.log('hi');
+  //     const val = $(event.currentTarget).find('.js-edit-desc').text();
+  //     console.log(val);
+  //     render();
+  //   });
+  // };
+
   const handleRatingFilter = () => {
     $('#js-rating-filter').change(function(event) {
       state.setMinRating($(event.target).val());
@@ -222,19 +217,18 @@ const bookmark_app = (function() {
     });
   };
 
-
   function bindEventListeners() {
     handleNewBookmarkSubmit();
     handleRatingFilter();
     handleCollapsing();
     handleDeleteClicked();
+    // handleEditDescMode();
+    // handleEditDescUpdate();
   }
 
   return {
     handleServerError,
-    handleUserError,
     render,
-    handleCollapsing,
     bindEventListeners,
   };
 }());

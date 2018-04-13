@@ -1,42 +1,33 @@
 'use strict';
-/* global bookmark_app, state, api */
+/* global state */
 
 const validation = (function() {
 
   const validateTitle = (title) => {
     console.log('validateTitle ran');
-    if (title.length === 0) {
-      $('<span class="error">Must be at least 1 character</span>').insertAfter($('.js-bookmark-title'));
-      // state.userError = 'Field is required';
-    } else {
-      $('.error').remove();
-      console.log('remove error');
+    if ($('.title-error').length < 1 && title.length === 0) {
+      $('<span class="error title-error">Title is required</span>').insertAfter($('.js-bookmark-title'));
+      state.userTitleError = true;
+    } else if (title.length > 0) {
+      $('.title-error').remove();
+      state.userTitleError = false;
     }
   };
 
   const validateUrl = (url) => {
-    if (url.length === 0) {
-
-      // state.userError = 'Field is required';
-      $('<span class="error">Error</span>').insertAfter($('.js-bookmark-title'));
-
+    console.log('validateUrl  ran');
+    let urlRegExp = url.match(/http/i);
+    if ($('.url-error').length < 1 && !urlRegExp) {
+      $('<span class="error url-error">http:// is required</span>').insertAfter($('.js-bookmark-url'));
+      state.userUrlError = true
+    } else if (urlRegExp) {
+      $('.url-error').remove();
+      state.userUrlError = false;
     }
   };
 
-  const validateDesc = (desc) => {
-
-  };
-
-  const validateRating = (rating) => {
-
-  };
-
-  // const
   return {
     validateTitle,
     validateUrl,
-    validateDesc,
-    validateRating,
-
   };
 }());
