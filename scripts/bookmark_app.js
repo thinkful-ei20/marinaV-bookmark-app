@@ -57,16 +57,37 @@ const bookmark_app = (function() {
     //   hideClass = 'hide';
     // }
 
+    const myArr = [
+      '<option value="1">1</option>',
+      '<option value="2">2</option>',
+      '<option value="3">3</option>',
+      '<option value="4">4</option>',
+      '<option value="5">5</option>',
+    ];
+    let num = bm.rating;
+    console.log(typeof num);
+    // let num = parseInt(bm.rating);
+    console.log(bm.rating);
+    myArr.forEach((str, ind) => {
+      // let foo = str.match(r);
+      // console.log(foo[0]);
+      let myInd = ind + 1;
+      if (myInd === num) {
+        let boo = `${str.slice(0, 17)} selected`;
+        let goo = `${str.slice(17)}`;
+      }
+    });
+
 
     return `
-       <article>
+       <article data-bm-id="${bm.id}">
         <h3>
-            <button class='js-collapsible' aria-expanded="${bm.expanded}" aria-controls="">${bm.title}</button>
+            <button class='js-collapsible-button' aria-expanded="${bm.expanded}" aria-controls="">${bm.title}</button>
         </h3>
         <div class="${!bm.expanded ? 'hide' : ''} js-collapsible">
             <p>${bm.desc}</p>
             <a href="${bm.url}" class='button-link' target="_blank">Visit Site</a>
-            <!--<button type="button">Visit Site</button>-->
+            <button class='js-delete-button' type="button">Delete</button>
         </div>
         <label for="rating-select">Rating:</label>
             <select id="rating-select" name="rating">
@@ -93,6 +114,7 @@ const bookmark_app = (function() {
 
     // insert that HTML into the DOM
     $('.js-bookmark-list').html(bookmarksString);
+
   }
 
 
@@ -159,18 +181,47 @@ const bookmark_app = (function() {
 
   const handleCollapsing = () => {
     console.log('handleCollapsing ran');
-    $('.js.js-bookmark-list').on('click', 'js-collapsible', function(event) {
-     const foo = event.currentTarget;
-     console.log(foo);
-     $('.js-collapsible').toggleClass('hide');
-
+    $('.js-bookmark-list').on('click', '.js-collapsible-button', function(event) {
+      event.stopPropagation();
+     const collapsEl = $(event.target).parent().next();
+     $(collapsEl).toggleClass('hide');
     })
+  };
+
+  const getIdFromElement = (bm) => {
+    console.log('getIdFromElement ran');
+    return $(bm)
+      .closest('article')
+      .data('bm-id');
+  };
+
+  const handleDeleteClicked = () => {
+    console.log('handleDeleteButton ran');
+    $('.js-bookmark-list').on('click', '.js-delete-button', event => {
+      event.stopPropagation();
+      console.log(event.target);
+      const id = getIdFromElement(event.target);
+      console.log(id);
+      api.deleteBookmark(id, () => {
+        state.findAndDelete(id);
+        render();
+      });
+    });
+  };
+
+  const handleRatingFilter = () => {
+    $('#js-rating-filter').change(function(event) {
+      state.setMinRating($(event.target).val());
+      render();
+    });
   };
 
 
   function bindEventListeners() {
     handleNewBookmarkSubmit();
+    handleRatingFilter();
     handleCollapsing();
+    handleDeleteClicked();
   }
 
   return {

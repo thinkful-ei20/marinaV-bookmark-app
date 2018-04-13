@@ -9,7 +9,18 @@ const state = (function() {
   const addBookmark = (bm) => {
     console.log('addBookmark ran');
     bm.expanded = false;
-    state.bookmarks.push(bm);
+    state.bookmarks.splice(0, 0, bm);
+  };
+
+  const findAndDelete = (id) => {
+    console.log('findAndDelete ran');
+    state.bookmarks = state.bookmarks.filter(bm => bm.id !== id);
+  };
+
+  const setMinRating = (newRating) => {
+    console.log('setMinRating ran');
+    console.log(newRating);
+    state.minRating = newRating;
   };
 
   const filterBm = () => {
@@ -18,8 +29,6 @@ const state = (function() {
     );
   };
 
-
-
   return {
     bookmarks: [],
     minRating: 1,
@@ -27,6 +36,8 @@ const state = (function() {
     userError: null,
 
     addBookmark,
+    findAndDelete,
+    setMinRating,
     filterBm,
   };
 }());
